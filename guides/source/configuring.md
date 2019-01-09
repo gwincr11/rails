@@ -448,6 +448,7 @@ All these configuration options are delegated to the `I18n` library.
   changes by moving the volatile information (max updated at and count) of
   the relation's cache key into the cache version to support recycling cache key.
   Defaults to `false`.
+* `config.active_record.queues.destroy` allows specifying the Active Job queue to use for destroy jobs. It defaults to `:active_record_destroy`.
 
 The MySQL adapter adds one additional configuration option:
 
