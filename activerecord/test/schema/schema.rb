@@ -119,6 +119,7 @@ ActiveRecord::Schema.define do
     t.datetime :published_on
     t.boolean :boolean_status
     t.index [:author_id, :name], unique: true
+    t.integer :tags_count, default: 0
     t.index :isbn, where: "published_on IS NOT NULL", unique: true
   end
 

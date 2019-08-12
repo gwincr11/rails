@@ -178,6 +178,11 @@ module ActiveRecord
         end
       end
 
+      def enqueue_destroy_all
+        ActiveRecord::DestroyAssociationLaterJob.
+          perform_later(load_target)
+      end
+
       # Removes +records+ from this association calling +before_remove+ and
       # +after_remove+ callbacks.
       #
