@@ -8,8 +8,10 @@ class Book < ActiveRecord::Base
 
   has_many :subscriptions
   has_many :subscribers, through: :subscriptions
-  has_many :taggings, as: :taggable, class_name: "Tagging", dependent: :destroy_async
-  has_many :tags, through: :taggings
+  has_many :taggings, as: :taggable, class_name: "Tagging"
+  has_many :tags, through: :taggings, dependent: :destroy_async
+  has_many :essays, dependent: :destroy_async
+  has_one :content, dependent: :destroy_async
 
   enum status: [:proposed, :written, :published]
   enum read_status: { unread: 0, reading: 2, read: 3, forgotten: nil }

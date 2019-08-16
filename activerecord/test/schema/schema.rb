@@ -236,6 +236,7 @@ ActiveRecord::Schema.define do
 
   create_table :content, force: true do |t|
     t.string :title
+    t.belongs_to :book
   end
 
   create_table :content_positions, force: true do |t|
@@ -350,6 +351,7 @@ ActiveRecord::Schema.define do
     t.string :writer_type
     t.string :category_id
     t.string :author_id
+    t.references :book
   end
 
   create_table :events, force: true do |t|

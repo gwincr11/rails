@@ -32,6 +32,8 @@ module ActiveRecord
             target.destroyed_by_association = reflection
             target.destroy
             throw(:abort) unless target.destroyed?
+          when :destroy_async
+            ActiveRecord::DestroyAssociationLaterJob.perform_later([target])
           when :nullify
             target.update_columns(nullified_owner_attributes) if target.persisted?
           end
