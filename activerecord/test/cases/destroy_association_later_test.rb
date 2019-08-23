@@ -53,7 +53,6 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     assert_difference -> { Content.count }, -1 do
       perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
     end
-
   end
 
   test "has_many" do

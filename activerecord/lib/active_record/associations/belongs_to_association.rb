@@ -12,7 +12,7 @@ module ActiveRecord
           target.destroy
           raise ActiveRecord::Rollback unless target.destroyed?
         when :destroy_async
-         ActiveRecord::DestroyAssociationLaterJob.
+          ActiveRecord::DestroyAssociationLaterJob.
           perform_later([target])
         else
           target.send(options[:dependent])
