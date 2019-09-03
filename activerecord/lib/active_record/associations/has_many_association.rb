@@ -27,8 +27,12 @@ module ActiveRecord
           load_target.each { |t| t.destroyed_by_association = reflection }
           destroy_all
         when :destroy_async
+
           load_target.each { |t| t.destroyed_by_association = reflection }
-          enqueue_destroy_all
+          ids = target.collect { |assoc| assoc.send(reflection.active_record_primary_key.to_sym) }
+          ActiveRecord::DestroyAssociationLaterJob.
+            perform_later(owner.class.to_s, owner.id, reflection.klass.to_s, ids)
+
         else
           delete_all
         end

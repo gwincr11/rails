@@ -33,6 +33,7 @@ module ActiveRecord
     # <tt>owner</tt>, the collection of its posts as <tt>target</tt>, and
     # the <tt>reflection</tt> object represents a <tt>:has_many</tt> macro.
     class Association #:nodoc:
+
       attr_reader :owner, :target, :reflection
 
       delegate :options, to: :reflection

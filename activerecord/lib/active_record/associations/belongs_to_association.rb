@@ -12,8 +12,10 @@ module ActiveRecord
           target.destroy
           raise ActiveRecord::Rollback unless target.destroyed?
         when :destroy_async
+          id = owner.send(reflection.foreign_key.to_sym)
+          puts "calling async"
           ActiveRecord::DestroyAssociationLaterJob.
-          perform_later([target])
+            perform_later(owner.class.to_s, owner.id, reflection.klass.to_s, [id])
         else
           target.send(options[:dependent])
         end
