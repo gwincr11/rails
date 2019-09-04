@@ -286,6 +286,37 @@ ActiveRecord::Schema.define do
     t.string :name
   end
 
+  create_table :destroy_later_parents, force: true, id: false do |t|
+    t.primary_key :parent_id
+    t.string :name
+  end
+
+  create_table :dl_keyed_belongs_tos, force: true, id: false do |t|
+    t.primary_key :belongs_key
+    t.references :destroy_later_parent
+  end
+
+   create_table :dl_keyed_has_ones, force: true, id: false do |t|
+    t.primary_key :has_one_key
+
+    t.references :destroy_later_parent
+  end
+
+   create_table :dl_keyed_has_manies, force: true, id: false do |t|
+    t.primary_key :many_key
+    t.references :destroy_later_parent
+  end
+
+   create_table :dl_keyed_has_many_throughs, force: true, id: false do |t|
+    t.primary_key :through_key
+  end
+
+   create_table :dl_keyed_joins, force: true, id: false do |t|
+    t.primary_key :joins_key
+    t.references :destroy_later_parent
+    t.references :dl_keyed_has_many_through
+  end
+
   create_table :developers, force: true do |t|
     t.string   :name
     t.string   :first_name

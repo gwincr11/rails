@@ -6,15 +6,12 @@ module ActiveRecord
 
     discard_on ActiveJob::DeserializationError
 
-    def perform(model_name, model_id, assoc_class, assoc_ids)
-      puts "in perform"
+    def perform(model_name, model_id, assoc_class, assoc_ids, primary_key_column)
       assoc_model = assoc_class.constantize
 
-      puts assoc_model
-      assoc_model.where(id: assoc_ids).each do |r|
+      assoc_model.where(primary_key_column => assoc_ids).each do |r|
         r.destroy
       end
-      puts "done"
     end
   end
 end

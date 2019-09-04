@@ -9,6 +9,13 @@ require "models/essay"
 require "models/category"
 require "models/post"
 require "models/content"
+require "models/destroy_later_parent"
+require "models/dl_keyed_belongs_to"
+require "models/dl_keyed_has_one"
+require "models/dl_keyed_join"
+require "models/dl_keyed_has_many"
+require "models/dl_keyed_has_many_through"
+
 
 class DestroyAssociationLaterTest < ActiveRecord::TestCase
   include ActiveJob::TestHelper
@@ -28,6 +35,22 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
       perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
     end
   end
+
+  test "enqueues the has_many through to be deleted with custom primary key" do
+   dl_keyed_has_many = DlKeyedHasManyThrough.create!
+   dl_keyed_has_many2 = DlKeyedHasManyThrough.create!
+   parent = DestroyLaterParent.create!
+   parent.dl_keyed_has_many_through << [dl_keyed_has_many2, dl_keyed_has_many]
+   parent.save!
+   parent.destroy
+   assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+
+    assert_difference -> { DlKeyedJoin.count }, -2 do
+    assert_difference -> { DlKeyedHasManyThrough.count }, -2 do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+  end
+ end
 
   test "belongs to" do
     essay = Essay.create!(name: "Der be treasure")

@@ -25,7 +25,6 @@ module ActiveJob
       # Will look up through all known serializers.
       # Raises <tt>ActiveJob::SerializationError</tt> if it can't find a proper serializer.
       def serialize(argument)
-        puts serializers.inspect
         serializer = serializers.detect { |s| s.serialize?(argument) }
         raise SerializationError.new("Unsupported argument type: #{argument.class.name}") unless serializer
         serializer.serialize(argument)

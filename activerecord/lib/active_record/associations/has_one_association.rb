@@ -34,8 +34,12 @@ module ActiveRecord
             throw(:abort) unless target.destroyed?
           when :destroy_async
             id = target.send(reflection.active_record_primary_key.to_sym)
+            primary_key_column = reflection.
+              active_record_primary_key.to_sym
             ActiveRecord::DestroyAssociationLaterJob.
-            perform_later(owner.class.to_s, owner.id, reflection.klass.to_s, [id])
+            perform_later(owner.class.to_s, owner.id,
+                          reflection.klass.to_s, [id],
+                          primary_key_column)
 
           when :nullify
             target.update_columns(nullified_owner_attributes) if target.persisted?
