@@ -31,13 +31,14 @@ module ActiveRecord
             t.destroyed_by_association = reflection
           end
           unless target.empty?
-            primary_key_column = target.first.class.primary_key.to_sym
+            assoc_class = target.first.class
+            primary_key_column = assoc_class.primary_key.to_sym
             ids = target.collect do |assoc|
               assoc.send(primary_key_column)
             end
             ActiveRecord::DestroyAssociationLaterJob.
               perform_later(owner.class.to_s, owner.id,
-                            reflection.klass.to_s, ids,
+                            assoc_class.to_s, ids,
                             primary_key_column)
           end
         else

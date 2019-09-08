@@ -155,4 +155,25 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
   end
  end
+
+  test "throw an error if the record is not actually deleted" do
+    dl_keyed_has_many = DlKeyedHasMany.new
+    parent = DestroyLaterParent.create!
+    parent.dl_keyed_has_many << [dl_keyed_has_many]
+
+    parent.save!
+    DestroyLaterParent.transaction do
+      parent.destroy
+      raise ActiveRecord::Rollback
+    end
+
+   assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+
+
+    assert_difference -> { DlKeyedHasMany.count }, 0 do
+      assert_raises ActiveRecord::DestroyAssociationLaterError do
+        perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+      end
+    end
+  end
 end
