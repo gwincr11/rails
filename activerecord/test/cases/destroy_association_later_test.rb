@@ -36,6 +36,27 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     end
   end
 
+  test "destroying a a scoped has_many through only deletes within the scope deleted" do
+    tag = Tag.create!(name: "Der be treasure")
+    tag2 = Tag.create!(name: "Der be rum")
+    parent = DestroyLaterParent.create!
+    parent.tags << [tag, tag2]
+    parent.save!
+
+    parent2 = DestroyLaterParent.find(parent.id)
+    parent2.destroy
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+
+    assert_difference -> { Tag.count }, -1 do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+    assert_raises ActiveRecord::RecordNotFound do
+      tag2.reload
+    end
+    assert tag.reload
+  end
+
+
   test "enqueues the has_many through to be deleted with custom primary key" do
    dl_keyed_has_many = DlKeyedHasManyThrough.create!
    dl_keyed_has_many2 = DlKeyedHasManyThrough.create!
@@ -65,6 +86,19 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     end
   end
 
+  test "enqueues belongs_to to be deleted with custom primary key" do
+    belongs = DlKeyedBelongsTo.create!
+    parent = DestroyLaterParent.create!
+    belongs.destory_later_parent = parent
+    belongs.save!
+    belongs.destroy
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+
+    assert_difference -> { DestroyLaterParent.count }, -1 do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+  end
+
   test "has_one" do
     content = Content.create(title: "hello")
     book = Book.create!(name: "Arr, matey!")
@@ -77,6 +111,21 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
       perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
     end
   end
+
+
+  test "enqueues has_one to be deleted with custom primary key" do
+    child = DlKeyedHasOne.create!
+    parent = DestroyLaterParent.create!
+    parent.dl_keyed_has_one = child
+    parent.save!
+    parent.destroy
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+
+    assert_difference -> { DlKeyedHasOne.count }, -1 do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+  end
+
 
   test "has_many" do
     essay = Essay.create!(name: "Der be treasure")
@@ -91,4 +140,19 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
       perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
     end
   end
+
+
+  test "enqueues the has_many to be deleted with custom primary key" do
+   dl_keyed_has_many = DlKeyedHasMany.new
+   parent = DestroyLaterParent.create!
+   parent.dl_keyed_has_many << [dl_keyed_has_many]
+
+   parent.save!
+   parent.destroy
+   assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+
+  assert_difference -> { DlKeyedHasMany.count }, -1 do
+    perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+  end
+ end
 end

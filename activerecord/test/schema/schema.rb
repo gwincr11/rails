@@ -289,6 +289,7 @@ ActiveRecord::Schema.define do
   create_table :destroy_later_parents, force: true, id: false do |t|
     t.primary_key :parent_id
     t.string :name
+    t.integer :tags_count, default: 0
   end
 
   create_table :dl_keyed_belongs_tos, force: true, id: false do |t|

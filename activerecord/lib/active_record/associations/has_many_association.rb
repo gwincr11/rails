@@ -27,17 +27,19 @@ module ActiveRecord
           load_target.each { |t| t.destroyed_by_association = reflection }
           destroy_all
         when :destroy_async
-          primary_key_column = reflection.active_record_primary_key.to_sym
           load_target.each do |t|
             t.destroyed_by_association = reflection
           end
-          ids = target.collect do |assoc|
-            assoc.send(primary_key_column)
+          unless target.empty?
+            primary_key_column = target.first.class.primary_key.to_sym
+            ids = target.collect do |assoc|
+              assoc.send(primary_key_column)
+            end
+            ActiveRecord::DestroyAssociationLaterJob.
+              perform_later(owner.class.to_s, owner.id,
+                            reflection.klass.to_s, ids,
+                            primary_key_column)
           end
-          ActiveRecord::DestroyAssociationLaterJob.
-            perform_later(owner.class.to_s, owner.id,
-                          reflection.klass.to_s, ids,
-                          primary_key_column)
         else
           delete_all
         end

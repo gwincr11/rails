@@ -33,9 +33,8 @@ module ActiveRecord
             target.destroy
             throw(:abort) unless target.destroyed?
           when :destroy_async
-            id = target.send(reflection.active_record_primary_key.to_sym)
-            primary_key_column = reflection.
-              active_record_primary_key.to_sym
+            primary_key_column = target.class.primary_key.to_sym
+            id = target.send(primary_key_column)
             ActiveRecord::DestroyAssociationLaterJob.
             perform_later(owner.class.to_s, owner.id,
                           reflection.klass.to_s, [id],
