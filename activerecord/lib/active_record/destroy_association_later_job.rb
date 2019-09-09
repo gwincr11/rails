@@ -4,21 +4,29 @@ module ActiveRecord
   class DestroyAssociationLaterError < StandardError
   end
 
+  # Destroy record association in a background job.
+  #
+  #  class ParentNode < ApplicationRecord
+  #    has_one :child, dependent: :destroy_later
+  #   end
+  #
+  #   +destroy_later+ param adds an +after_destroy+ callback that schedules an ActiveRecord::DestroyAssocitionLaterJob.
+  #
   class DestroyAssociationLaterJob < ActiveJob::Base
     queue_as { ActiveRecord::Base.queues[:destroy] }
 
     discard_on ActiveJob::DeserializationError
 
-    def perform(model_name, model_id, assoc_class, assoc_ids, primary_key_column)
+    def perform(owner_model_name, owner_id, assoc_class, assoc_ids, assoc_primary_key_column)
       assoc_model = assoc_class.constantize
-      owner_class = model_name.constantize
+      owner_class = owner_model_name.constantize
       owner = owner_class
-        .where(owner_class.primary_key.to_sym => model_id)
+        .where(owner_class.primary_key.to_sym => owner_id)
 
       if !owner.empty?
         raise DestroyAssociationLaterError, "owner record not destroyed"
       end
-      assoc_model.where(primary_key_column => assoc_ids).find_each do |r|
+      assoc_model.where(assoc_primary_key_column => assoc_ids).find_each do |r|
         r.destroy
       end
     end

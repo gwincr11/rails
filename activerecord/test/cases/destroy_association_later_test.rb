@@ -66,11 +66,11 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
    parent.destroy
    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
 
-    assert_difference -> { DlKeyedJoin.count }, -2 do
-    assert_difference -> { DlKeyedHasManyThrough.count }, -2 do
-      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
-    end
-  end
+   assert_difference -> { DlKeyedJoin.count }, -2 do
+   assert_difference -> { DlKeyedHasManyThrough.count }, -2 do
+     perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+   end
+ end
  end
 
   test "belongs to" do
@@ -151,9 +151,9 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
    parent.destroy
    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
 
-  assert_difference -> { DlKeyedHasMany.count }, -1 do
-    perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
-  end
+   assert_difference -> { DlKeyedHasMany.count }, -1 do
+     perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+   end
  end
 
   test "throw an error if the record is not actually deleted" do
@@ -167,7 +167,7 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
       raise ActiveRecord::Rollback
     end
 
-   assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
 
 
     assert_difference -> { DlKeyedHasMany.count }, 0 do
