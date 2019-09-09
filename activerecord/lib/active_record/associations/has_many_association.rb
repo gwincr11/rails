@@ -26,7 +26,7 @@ module ActiveRecord
           # No point in executing the counter update since we're going to destroy the parent anyway
           load_target.each { |t| t.destroyed_by_association = reflection }
           destroy_all
-        when :destroy_async
+        when :destroy_later
           load_target.each do |t|
             t.destroyed_by_association = reflection
           end

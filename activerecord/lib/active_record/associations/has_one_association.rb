@@ -32,7 +32,7 @@ module ActiveRecord
             target.destroyed_by_association = reflection
             target.destroy
             throw(:abort) unless target.destroyed?
-          when :destroy_async
+          when :destroy_later
             primary_key_column = target.class.primary_key.to_sym
             id = target.send(primary_key_column)
             ActiveRecord::DestroyAssociationLaterJob.
