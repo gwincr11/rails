@@ -292,6 +292,12 @@ ActiveRecord::Schema.define do
     t.integer :tags_count, default: 0
   end
 
+  create_table :destroy_later_parent_soft_deletes, force: true do |t|
+    t.integer :tags_count, default: 0
+    t.boolean :deleted
+  end
+
+
   create_table :dl_keyed_belongs_tos, force: true, id: false do |t|
     t.primary_key :belongs_key
     t.references :destroy_later_parent

@@ -15,7 +15,6 @@ module ActiveRecord
           id = owner.send(reflection.foreign_key.to_sym)
           primary_key_column = reflection.
               active_record_primary_key.to_sym
-
           ActiveRecord::DestroyAssociationLaterJob.
             perform_later(owner.class.to_s, owner.id,
                           reflection.klass.to_s, [id],

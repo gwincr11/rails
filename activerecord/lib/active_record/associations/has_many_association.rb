@@ -39,7 +39,8 @@ module ActiveRecord
             ActiveRecord::DestroyAssociationLaterJob.
               perform_later(owner.class.to_s, owner.id,
                             assoc_class.to_s, ids,
-                            primary_key_column)
+                            primary_key_column,
+                            owner_ensuring_destroy_method: options.fetch(:owner_ensuring_destroy, nil))
           end
         else
           delete_all

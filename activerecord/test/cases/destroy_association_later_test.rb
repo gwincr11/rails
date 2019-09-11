@@ -10,6 +10,7 @@ require "models/category"
 require "models/post"
 require "models/content"
 require "models/destroy_later_parent"
+require "models/destroy_later_parent_soft_delete"
 require "models/dl_keyed_belongs_to"
 require "models/dl_keyed_has_one"
 require "models/dl_keyed_join"
@@ -175,5 +176,42 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
         perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
       end
     end
+  end
+
+  test "ensures function for parent" do
+    tag = Tag.create!(name: "Der be treasure")
+    tag2 = Tag.create!(name: "Der be rum")
+    parent = DestroyLaterParentSoftDelete.create!
+    parent.tags << [tag, tag2]
+    parent.save!
+
+    parent.run_callbacks(:destroy)
+
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+    assert_difference -> { Tag.count }, -0 do
+      assert_raises ActiveRecord::DestroyAssociationLaterError do
+        perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+      end
+    end
+
+    parent.destroy
+    assert_difference -> { Tag.count }, -2 do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+  end
+
+  test "ensures function for child" do
+  end
+
+
+  test "Don't enqueue with no relations" do
+    parent = DestroyLaterParent.create!
+    parent.destroy
+
+
+    assert_no_enqueued_jobs
+  end
+
+  test "retry failed jobs" do
   end
 end

@@ -17,18 +17,26 @@ module ActiveRecord
 
     discard_on ActiveJob::DeserializationError
 
-    def perform(owner_model_name, owner_id, assoc_class, assoc_ids, assoc_primary_key_column)
+    def perform(owner_model_name, owner_id, assoc_class, assoc_ids, assoc_primary_key_column, owner_ensuring_destroy_method: nil)
       assoc_model = assoc_class.constantize
       owner_class = owner_model_name.constantize
       owner = owner_class
         .where(owner_class.primary_key.to_sym => owner_id)
 
-      if !owner.empty?
+      if !owner_destroyed?(owner, owner_ensuring_destroy_method)
         raise DestroyAssociationLaterError, "owner record not destroyed"
       end
       assoc_model.where(assoc_primary_key_column => assoc_ids).find_each do |r|
         r.destroy
       end
     end
+
+    private
+
+      def owner_destroyed?(owner, owner_ensuring_destroy_method)
+        return true if owner.empty?
+        return owner.first.public_send(owner_ensuring_destroy_method) unless owner_ensuring_destroy_method.nil?
+        false
+      end
   end
 end
