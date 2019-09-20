@@ -208,10 +208,23 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     parent = DestroyLaterParent.create!
     parent.destroy
 
-
     assert_no_enqueued_jobs
   end
 
-  test "retry failed jobs" do
+  test "retry failed jobs when not yet deleted to deal with race conditions" do
+    tag = Tag.create!(name: "Der be treasure")
+    tag2 = Tag.create!(name: "Der be rum")
+    parent = DestroyLaterParent.create!
+    parent.tags << [tag, tag2]
+    parent.save!
+
+    parent.run_callbacks(:destroy)
+
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+    assert_raises ActiveRecord::DestroyAssociationLaterError do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
   end
 end

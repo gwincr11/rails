@@ -36,9 +36,11 @@ module ActiveRecord
             primary_key_column = target.class.primary_key.to_sym
             id = target.send(primary_key_column)
             ActiveRecord::DestroyAssociationLaterJob.
-            perform_later(owner.class.to_s, owner.id,
-                          reflection.klass.to_s, [id],
-                          primary_key_column)
+              perform_later(owner_model_name: owner.class.to_s,
+                            owner_id: owner.id,
+                            assoc_class: reflection.klass.to_s,
+                            assoc_ids: [id],
+                            assoc_primary_key_column: primary_key_column)
 
           when :nullify
             target.update_columns(nullified_owner_attributes) if target.persisted?

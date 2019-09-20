@@ -17,7 +17,9 @@ module ActiveRecord
 
     discard_on ActiveJob::DeserializationError
 
-    def perform(owner_model_name, owner_id, assoc_class, assoc_ids, assoc_primary_key_column, owner_ensuring_destroy_method: nil)
+    def perform(owner_model_name: nil, owner_id: nil, assoc_class: nil,
+                assoc_ids: nil, assoc_primary_key_column: nil,
+                owner_ensuring_destroy_method: nil)
       assoc_model = assoc_class.constantize
       owner_class = owner_model_name.constantize
       owner = owner_class

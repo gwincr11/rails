@@ -37,9 +37,11 @@ module ActiveRecord
               assoc.send(primary_key_column)
             end
             ActiveRecord::DestroyAssociationLaterJob.
-              perform_later(owner.class.to_s, owner.id,
-                            assoc_class.to_s, ids,
-                            primary_key_column,
+              perform_later(owner_model_name: owner.class.to_s,
+                            owner_id: owner.id,
+                            assoc_class: assoc_class.to_s,
+                            assoc_ids: ids,
+                            assoc_primary_key_column: primary_key_column,
                             owner_ensuring_destroy_method: options.fetch(:owner_ensuring_destroy, nil))
           end
         else
