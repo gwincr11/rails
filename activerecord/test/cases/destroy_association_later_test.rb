@@ -178,7 +178,7 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     end
   end
 
-  test "ensures function for parent" do
+  test "has many ensures function for parent" do
     tag = Tag.create!(name: "Der be treasure")
     tag2 = Tag.create!(name: "Der be rum")
     parent = DestroyLaterParentSoftDelete.create!
@@ -200,6 +200,28 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     end
   end
 
+  test "has one ensures function for parent" do
+    child = DlKeyedHasOne.create!
+    parent = DestroyLaterParentSoftDelete.create!
+    parent.dl_keyed_has_one = child
+    parent.save!
+
+    parent.run_callbacks(:destroy)
+
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+    assert_difference -> { DlKeyedHasOne.count }, -0 do
+      assert_raises ActiveRecord::DestroyAssociationLaterError do
+        perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+      end
+    end
+
+    parent.destroy
+    assert_difference -> { DlKeyedHasOne.count }, -1 do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+  end
+
+
   test "ensures function for child" do
   end
 
@@ -209,22 +231,5 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     parent.destroy
 
     assert_no_enqueued_jobs
-  end
-
-  test "retry failed jobs when not yet deleted to deal with race conditions" do
-    tag = Tag.create!(name: "Der be treasure")
-    tag2 = Tag.create!(name: "Der be rum")
-    parent = DestroyLaterParent.create!
-    parent.tags << [tag, tag2]
-    parent.save!
-
-    parent.run_callbacks(:destroy)
-
-    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
-    assert_raises ActiveRecord::DestroyAssociationLaterError do
-      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
-    end
-
-    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
   end
 end

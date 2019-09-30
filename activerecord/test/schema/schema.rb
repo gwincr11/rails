@@ -307,6 +307,7 @@ ActiveRecord::Schema.define do
    t.primary_key :has_one_key
 
    t.references :destroy_later_parent
+   t.references :destroy_later_parent_soft_delete
  end
 
   create_table :dl_keyed_has_manies, force: true, id: false do |t|

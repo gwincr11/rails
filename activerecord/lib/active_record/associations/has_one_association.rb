@@ -40,7 +40,8 @@ module ActiveRecord
                             owner_id: owner.id,
                             assoc_class: reflection.klass.to_s,
                             assoc_ids: [id],
-                            assoc_primary_key_column: primary_key_column)
+                            assoc_primary_key_column: primary_key_column,
+                           owner_ensuring_destroy_method: options.fetch(:owner_ensuring_destroy, nil))
 
           when :nullify
             target.update_columns(nullified_owner_attributes) if target.persisted?
