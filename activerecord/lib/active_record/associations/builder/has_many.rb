@@ -10,6 +10,7 @@ module ActiveRecord::Associations::Builder # :nodoc:
       valid = super + [:counter_cache, :join_table, :index_errors, :owner_ensuring_destroy]
       valid += [:as, :foreign_type] if options[:as]
       valid += [:through, :source, :source_type] if options[:through]
+      valid += [:owner_ensuring_destroy] if options[:dependent] == :destroy_later
       valid
     end
 

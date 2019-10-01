@@ -7,8 +7,9 @@ module ActiveRecord::Associations::Builder # :nodoc:
     end
 
     def self.valid_options(options)
-      valid = super + [:owner_ensuring_destroy]
+      valid = super
       valid += [:as, :foreign_type] if options[:as]
+      valid += [:owner_ensuring_destroy] if options[:dependent] == :destroy_later
       valid += [:through, :source, :source_type] if options[:through]
       valid
     end

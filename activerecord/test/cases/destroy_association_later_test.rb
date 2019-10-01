@@ -12,6 +12,7 @@ require "models/content"
 require "models/destroy_later_parent"
 require "models/destroy_later_parent_soft_delete"
 require "models/dl_keyed_belongs_to"
+require "models/dl_keyed_belongs_to_soft_delete"
 require "models/dl_keyed_has_one"
 require "models/dl_keyed_join"
 require "models/dl_keyed_has_many"
@@ -221,10 +222,24 @@ class DestroyAssociationLaterTest < ActiveRecord::TestCase
     end
   end
 
+  test "enqueues belongs_to to be deleted with ensuring function" do
+    belongs = DlKeyedBelongsToSoftDelete.create!
+    parent = DestroyLaterParentSoftDelete.create!
+    belongs.destory_later_parent_soft_delete = parent
+    belongs.save!
+    belongs.run_callbacks(:destroy)
 
-  test "ensures function for child" do
+    assert_enqueued_with job: ActiveRecord::DestroyAssociationLaterJob
+    assert_raises ActiveRecord::DestroyAssociationLaterError do
+      perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    end
+
+    assert_not parent.reload.deleted?
+
+    belongs.destroy
+    perform_enqueued_jobs only: ActiveRecord::DestroyAssociationLaterJob
+    assert parent.reload.deleted?
   end
-
 
   test "Don't enqueue with no relations" do
     parent = DestroyLaterParent.create!

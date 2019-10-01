@@ -9,6 +9,7 @@ module ActiveRecord::Associations::Builder # :nodoc:
     def self.valid_options(options)
       valid = super + [:counter_cache, :optional, :default]
       valid += [:polymorphic, :foreign_type] if options[:polymorphic]
+      valid += [:owner_ensuring_destroy] if options[:dependent] == :destroy_later
       valid
     end
 

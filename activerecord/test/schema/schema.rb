@@ -297,10 +297,15 @@ ActiveRecord::Schema.define do
     t.boolean :deleted
   end
 
-
   create_table :dl_keyed_belongs_tos, force: true, id: false do |t|
     t.primary_key :belongs_key
     t.references :destroy_later_parent
+  end
+
+  create_table :dl_keyed_belongs_to_soft_deletes, force: true do |t|
+    t.references :destory_later_parent_soft_delete,
+      index: { name: :soft_del_parent }
+    t.boolean :deleted
   end
 
   create_table :dl_keyed_has_ones, force: true, id: false do |t|
