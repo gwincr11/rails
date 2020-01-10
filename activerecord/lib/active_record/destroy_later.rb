@@ -26,14 +26,17 @@ module ActiveRecord
   module DestroyLater
     extend ActiveSupport::Concern
 
+    ACTIVE_JOB_ERROR_MESSAGE = "ActiveJob is required to use the destroy later function"
     module ClassMethods
       def destroy_later(after:, if: nil, ensuring: nil)
+        raise ActiveRecord::ActiveJobRequiredError.new ACTIVE_JOB_ERROR_MESSAGE unless defined?(ActiveJob)
         after_commit -> { destroy_later after: after, ensuring: ensuring },
           on: binding.local_variable_get(:if) ? %i[ create update ] : :create, if: binding.local_variable_get(:if)
       end
     end
 
     def destroy_later(after:, ensuring: nil)
+      raise ActiveRecord::ActiveJobRequiredError.new ACTIVE_JOB_ERROR_MESSAGE unless defined?(ActiveJob)
       ActiveRecord::DestroyJob.set(wait: after).perform_later(self, ensuring: ensuring)
     end
   end

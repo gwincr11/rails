@@ -4,7 +4,7 @@ require "active_record"
 require "rails"
 require "active_support/core_ext/object/try"
 require "active_model/railtie"
-require "active_job/railtie"
+require "active_job/railtie" if defined?(ActiveJob)
 
 # For now, action_controller must always be present with
 # Rails, so let's make sure that it gets required before
@@ -34,7 +34,7 @@ module ActiveRecord
     config.active_record.sqlite3 = ActiveSupport::OrderedOptions.new
     config.active_record.sqlite3.represent_boolean_as_integer = nil
 
-    config.active_record.queues = ActiveSupport::InheritableOptions.new(destroy: :active_record_destroy)
+    config.active_record.queues = ActiveSupport::InheritableOptions.new(destroy: :active_record_destroy) if defined?(ActiveJob)
 
     config.eager_load_namespaces << ActiveRecord
 
