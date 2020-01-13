@@ -202,4 +202,14 @@ module InTimeZone
     end
 end
 
+if defined?(ActiveJob)
+  require "global_id"
+  GlobalID.app = "ActiveRecordExampleApp"
+  ActiveRecord::Base.include GlobalID::Identification
+
+  require "active_job"
+  ActiveJob::Base.queue_adapter = :test
+  ActiveJob::Base.logger = ActiveSupport::Logger.new(nil)
+end
+
 require_relative "../../../tools/test_common"

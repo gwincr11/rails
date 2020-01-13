@@ -1,10 +1,19 @@
 # frozen_string_literal: true
 
+require File.expand_path("../../../activejob/lib/active_job", File.dirname(__FILE__))
 require "cases/helper"
 
 require "models/book"
 require "models/pirate"
 require "models/parrot"
+
+class Book
+  destroy_later after: 30.days, if: -> { status_previously_changed? && published? }, ensuring: :published?
+end
+
+class Pirate
+  destroy_later after: 10.days
+end
 
 class DestroyLaterTest < ActiveRecord::TestCase
   include ActiveJob::TestHelper
