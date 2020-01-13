@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require File.expand_path("../../../activejob/lib/active_job", File.dirname(__FILE__))
 require "cases/helper"
 
 require "models/book"
@@ -17,6 +18,13 @@ require "models/dl_keyed_has_one"
 require "models/dl_keyed_join"
 require "models/dl_keyed_has_many"
 require "models/dl_keyed_has_many_through"
+
+class Book
+  has_many :taggings, as: :taggable, class_name: "Tagging"
+  has_many :tags, through: :taggings, dependent: :destroy_later
+  has_many :essays, dependent: :destroy_later
+  has_one :content, dependent: :destroy_later
+end
 
 
 class DestroyAssociationLaterTest < ActiveRecord::TestCase
