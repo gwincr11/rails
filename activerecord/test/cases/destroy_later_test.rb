@@ -3,82 +3,82 @@
 require File.expand_path("../../../activejob/lib/active_job", File.dirname(__FILE__))
 require "cases/helper"
 
-require "models/book"
-require "models/pirate"
-require "models/parrot"
-
-class Book
-  destroy_later after: 30.days, if: -> { status_previously_changed? && published? }, ensuring: :published?
-end
-
-class Pirate
-  destroy_later after: 10.days
-end
+require "models/destroy_later_parent"
+require "models/book_destroy_later"
+require "models/dl_keyed_belongs_to"
+require "models/dl_keyed_belongs_to_soft_delete"
+require "models/dl_keyed_has_one"
+require "models/dl_keyed_join"
+require "models/dl_keyed_has_many"
+require "models/dl_keyed_has_many_through"
+require "models/tag"
+require "models/tagging"
 
 class DestroyLaterTest < ActiveRecord::TestCase
   include ActiveJob::TestHelper
 
-  fixtures :books, :pirates
 
-  test "creating a pirate enqueues it for unconditional destruction 10 days later" do
+  test "creating a destroy later parent enqueues it for unconditional destruction 10 days later" do
     freeze_time
 
-    pirate = Pirate.create!(catchphrase: "Arr, matey!")
-    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ pirate, ensuring: nil ], at: 10.days.from_now
+    dl_parent = DestroyLaterParent.create!()
+    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ dl_parent, ensuring: nil ], at: 10.days.from_now
 
     travel 10.days
 
-    assert_difference -> { Pirate.count }, -1 do
+    assert_difference -> { DestroyLaterParent.count }, -1 do
       perform_enqueued_jobs only: ActiveRecord::DestroyJob
     end
   end
 
-  test "updating a pirate does not enqueue it for destruction" do
+  test "updating a destroy later parent does not enqueue it for destruction" do
+    dl_parent = DestroyLaterParent.create!()
     assert_no_enqueued_jobs only: ActiveRecord::DestroyJob do
-      pirates(:redbeard).update! catchphrase: "Shiver me timbers!"
+      dl_parent.update!(name: "Hello")
     end
   end
 
-  test "updating a pirate does not prevent its scheduled destruction" do
+  test "updating a destroy later parent does not prevent its scheduled destruction" do
     freeze_time
 
-    pirate = Pirate.create!(catchphrase: "Arr, matey!")
-    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ pirate, ensuring: nil ], at: 10.days.from_now
+    dl_parent = DestroyLaterParent.create!()
+    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ dl_parent, ensuring: nil ], at: 10.days.from_now
 
     travel 2.days
 
-    pirate.update! catchphrase: "Shiver me timbers!"
+    dl_parent.update!(name: "Hello")
 
     travel 8.days
 
-    assert_difference -> { Pirate.count }, -1 do
+    assert_difference -> { DestroyLaterParent.count }, -1 do
       perform_enqueued_jobs only: ActiveRecord::DestroyJob
     end
   end
 
-  test "publishing a book enqueues it for destruction 30 days later" do
+  test "publishing a book destroy later enqueues it for destruction 30 days later" do
     freeze_time
+    book = BookDestroyLater.create
 
-    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ books(:rfr), ensuring: :published? ], at: 30.days.from_now do
-      books(:rfr).published!
+    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ book, ensuring: :published? ], at: 30.days.from_now do
+      book.published!
     end
 
     travel 30.days
 
-    assert_difference -> { Book.count }, -1 do
+    assert_difference -> { BookDestroyLater.count }, -1 do
       perform_enqueued_jobs only: ActiveRecord::DestroyJob
     end
   end
 
-  test "creating a published book enqueues it for destruction 30 days later" do
+  test "creating a published book destroy later enqueues it for destruction 30 days later" do
     freeze_time
 
-    book = Book.create!(name: "Getting Real", status: :published)
+    book = BookDestroyLater.create!(status: :published)
     assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ book, ensuring: :published? ], at: 30.days.from_now
 
     travel 30.days
 
-    assert_difference -> { Book.count }, -1 do
+    assert_difference -> { BookDestroyLater.count }, -1 do
       perform_enqueued_jobs only: ActiveRecord::DestroyJob
     end
   end
@@ -86,26 +86,28 @@ class DestroyLaterTest < ActiveRecord::TestCase
   test "unpublishing a book prevents its scheduled destruction" do
     freeze_time
 
-    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ books(:rfr), ensuring: :published? ], at: 30.days.from_now do
-      books(:rfr).published!
+    book = BookDestroyLater.create
+    assert_enqueued_with job: ActiveRecord::DestroyJob, args: [ book, ensuring: :published? ], at: 30.days.from_now do
+      book.published!
     end
 
     travel 10.days
 
     assert_no_enqueued_jobs do
-      books(:rfr).proposed!
+      book.proposed!
     end
 
     travel 20.days
 
-    assert_no_difference -> { Book.count } do
+    assert_no_difference -> { BookDestroyLater.count } do
       perform_enqueued_jobs only: ActiveRecord::DestroyJob
     end
   end
 
   test "writing a book does not enqueue it for destruction" do
+    book = BookDestroyLater.create
     assert_no_enqueued_jobs do
-      books(:rfr).written!
+      book.written!
     end
   end
 end

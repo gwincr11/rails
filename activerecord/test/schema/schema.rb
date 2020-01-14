@@ -123,6 +123,10 @@ ActiveRecord::Schema.define do
     t.index :isbn, where: "published_on IS NOT NULL", unique: true
   end
 
+  create_table :book_destroy_laters, id: :integer, force: true do |t|
+    t.column :status, :integer, default: 0
+  end
+
   create_table :booleans, force: true do |t|
     t.boolean :value
     t.boolean :has_fun, null: false, default: false

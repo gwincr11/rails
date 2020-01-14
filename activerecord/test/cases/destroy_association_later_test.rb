@@ -26,11 +26,25 @@ class Book
   has_one :content, dependent: :destroy_later
 end
 
+class Essay
+  belongs_to :book, dependent: :destroy_later
+end
 
 class DestroyAssociationLaterTest < ActiveRecord::TestCase
   include ActiveJob::TestHelper
 
   fixtures :books, :tags
+
+  def teardown
+
+    Object.send(:remove_const, :Book)
+    Object.send(:remove_const, :Tag)
+    Object.send(:remove_const, :Tagging)
+    Object.send(:remove_const, :Essay)
+    Object.send(:remove_const, :Category)
+    Object.send(:remove_const, :Post)
+    Object.send(:remove_const, :Content)
+  end
 
   test "destroying a book enqueues the has_many through tags to be deleted" do
     tag = Tag.create!(name: "Der be treasure")

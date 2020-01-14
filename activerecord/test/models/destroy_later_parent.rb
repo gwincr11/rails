@@ -15,4 +15,6 @@
 
    has_many :taggings, as: :taggable, class_name: "Tagging"
    has_many :tags, -> { where name: "Der be rum" }, through: :taggings, dependent: :destroy_later
+
+   destroy_later after: 10.days
  end
