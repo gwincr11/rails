@@ -4,7 +4,9 @@ require File.expand_path("../../../activejob/lib/active_job", File.dirname(__FIL
 require "cases/helper"
 
 require "models/destroy_later_parent"
+require "models/content"
 require "models/book_destroy_later"
+require "models/essay_destroy_later"
 require "models/dl_keyed_belongs_to"
 require "models/dl_keyed_belongs_to_soft_delete"
 require "models/dl_keyed_has_one"

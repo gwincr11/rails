@@ -35,8 +35,7 @@ module ActiveRecord
           when :destroy_later
             primary_key_column = target.class.primary_key.to_sym
             id = target.send(primary_key_column)
-            ActiveRecord::DestroyAssociationLaterJob.
-              perform_later(owner_model_name: owner.class.to_s,
+            enqueue_destroy_association(owner_model_name: owner.class.to_s,
                             owner_id: owner.id,
                             assoc_class: reflection.klass.to_s,
                             assoc_ids: [id],

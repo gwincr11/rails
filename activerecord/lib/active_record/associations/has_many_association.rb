@@ -36,8 +36,7 @@ module ActiveRecord
             ids = target.collect do |assoc|
               assoc.send(primary_key_column)
             end
-            ActiveRecord::DestroyAssociationLaterJob.
-              perform_later(owner_model_name: owner.class.to_s,
+            enqueue_destroy_association(owner_model_name: owner.class.to_s,
                             owner_id: owner.id,
                             assoc_class: assoc_class.to_s,
                             assoc_ids: ids,

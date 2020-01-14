@@ -125,6 +125,8 @@ ActiveRecord::Schema.define do
 
   create_table :book_destroy_laters, id: :integer, force: true do |t|
     t.column :status, :integer, default: 0
+    t.column :name, :string
+    t.integer :tags_count, default: 0
   end
 
   create_table :booleans, force: true do |t|
@@ -241,6 +243,7 @@ ActiveRecord::Schema.define do
   create_table :content, force: true do |t|
     t.string :title
     t.belongs_to :book
+    t.belongs_to :book_destroy_later
   end
 
   create_table :content_positions, force: true do |t|
@@ -400,6 +403,11 @@ ActiveRecord::Schema.define do
     t.string :category_id
     t.string :author_id
     t.references :book
+  end
+
+  create_table :essay_destroy_laters, force: true do |t|
+    t.string :name, **case_sensitive_options
+    t.references :book_destroy_later
   end
 
   create_table :events, force: true do |t|
@@ -1023,6 +1031,14 @@ ActiveRecord::Schema.define do
 
   create_table :tyres, force: true do |t|
     t.integer :car_id
+  end
+
+  create_table :unused_destroy_laters, force: true do |t|
+
+  end
+
+  create_table :unused_belongs_to, force: true do |t|
+    t.belongs_to :unused_destroy_later
   end
 
   create_table :variants, force: true do |t|

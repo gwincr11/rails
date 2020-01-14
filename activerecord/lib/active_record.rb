@@ -76,10 +76,8 @@ module ActiveRecord
   autoload :SecureToken
   autoload :DatabaseSelector, "active_record/middleware/database_selector"
   autoload :DestroyLater
-  if defined?(ActiveJob)
-    autoload :DestroyAssociationLaterJob
-    autoload :DestroyJob
-  end
+  autoload :DestroyAssociationLaterJob
+  autoload :DestroyJob
 
   eager_autoload do
     autoload :ConnectionAdapters

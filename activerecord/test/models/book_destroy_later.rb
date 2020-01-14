@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class BookDestroyLater < ActiveRecord::Base
-#  has_many :taggings, as: :taggable, class_name: "Tagging"
-#  has_many :tags, through: :taggings, dependent: :destroy_later
-#  has_many :essays, dependent: :destroy_later
-#  has_one :content, dependent: :destroy_later
+  has_many :taggings, as: :taggable, class_name: "Tagging"
+  has_many :tags, through: :taggings, dependent: :destroy_later
+  has_many :essay_destroy_later, dependent: :destroy_later
+  has_one :content, dependent: :destroy_later
 
   enum status: [:proposed, :written, :published]
 
